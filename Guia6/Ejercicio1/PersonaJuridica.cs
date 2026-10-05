@@ -15,52 +15,50 @@ namespace Ejercicio1
             get { return cuit; }
             set
             {
-                if (value == null || !Regex.IsMatch(value, @"^\d{11}$"))
+                if (value == null || Regex.IsMatch(value, @"^\d{11}$") == false
+               || DigitoVerificadorValido(value) == false)
                 {
-                    throw new FormatoCUITNoValidoException("El CUIT debe tener exactamente 11 dígitos numéricos.");
+                    throw new FormatoCUITNoValidoException(
+                        "El CUIT debe tener 11 dígitos numéricos y se debe verificar con el digito verificador.");
                 }
-
-                int[] multiplicadores = { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
-                int suma = 0;
-
-                for (int i = 0; i < 10; i++)
-                {
-                    suma += (value[i] - '0') * multiplicadores[i];
-                }
-
-                int resto = suma % 11;
-                int digitoEsperado;
-
-                if (resto == 0)
-                {
-                    digitoEsperado = 0;
-                }
-                else if (resto == 1)
-                {
-                    digitoEsperado = 9;
-                }
-                else
-                {
-                    digitoEsperado = 11 - resto;
-                }
-
-                int digitoIngresado = value[10] - '0';
-
-                if (digitoEsperado != digitoIngresado)
-                {
-                    throw new FormatoCUITNoValidoException("El dígito verificador del CUIT no es válido.");
-                }
-
                 cuit = value;
             }
         }
         public PersonaJuridica(string nombre, string cuit) : base(nombre)
         {
-            this.cuit = cuit;
+            this.Cuit = cuit;
         }
         public override string Describir()
         {
-            return base.Describir() + $" - CUIT: {cuit}";
+            return base.Describir() + $" ( {cuit} )";
+        }
+        private bool DigitoVerificadorValido(string valor)
+        {
+            int[] pesos = { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
+            int suma = 0;
+
+            for (int i = 0; i < 10; i++)
+            {
+                suma += (valor[i] - '0') * pesos[i];
+            }
+
+            int resto = suma % 11;
+            int dv;
+
+            if (resto == 0)
+            {
+                dv = 0;
+            }
+            else if (resto == 1)
+            {
+                dv = 9;
+            }
+            else
+            {
+                dv = 11 - resto;
+            }
+
+            return dv == (valor[10] - '0');
         }
     }
 }
